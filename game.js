@@ -16,6 +16,7 @@ class Snake {
     #length = 1;
     body = [{x:0, y:0}];
     direction = 'r';
+    currentlyMovingDir = 'r';
 
     grow() {
         this.body.push({x: this.#x , y: this.#y})
@@ -49,6 +50,7 @@ class Snake {
         
         this.body.pop();
         this.body.unshift({x: this.#x, y: this.#y});
+        this.currentlyMovingDir = this.direction;
     }
 }
 
@@ -65,25 +67,31 @@ const draw = setInterval(() => {
 
 window.addEventListener('keydown', (e) => {
     console.log(e.code);
+    
     switch (e.code) {
         case('ArrowDown'):
         case('KeyS'):
-        if (snake.direction != 'u') snake.changeDirection('d');
+        if (snake.direction != 'u' && snake.currentlyMovingDir != 'u') snake.changeDirection('d');
         break;
         case('ArrowUp'):
         case('KeyW'):
-        if (snake.direction != 'd') snake.changeDirection('u');
+        if (snake.direction != 'd' && snake.currentlyMovingDir != 'd') snake.changeDirection('u');
         break;
         case('ArrowRight'):
         case('KeyD'):
-        if (snake.direction != 'l') snake.changeDirection('r');
+        if (snake.direction != 'l' && snake.currentlyMovingDir != 'l') snake.changeDirection('r');
         break;
         case('ArrowLeft'):
         case('KeyA'):
-        if (snake.direction != 'r') snake.changeDirection('l');
+        if (snake.direction != 'r' && snake.currentlyMovingDir != 'r') snake.changeDirection('l');
         break;
         case('Space'):
         snake.grow();
         break;
     }
 })
+
+// -----------------------------------
+// Bug
+// -----------------------------------
+// direction change is faster than interval, snake can go backwards
