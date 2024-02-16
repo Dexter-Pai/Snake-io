@@ -9,21 +9,18 @@ const canvasWidth = canvas.clientWidth;
 const canvasHeight = canvas.clientHeight;
 
 class Snake {
-    snakeWidth = 50;
-    snakeHeight = 50;
-    x = 0;
-    y = 0;
-    length = 0;
-    body = [];
-    direction;
+    snakeWidth = 25;
+    snakeHeight = 25;
+    #x = 0;
+    #y = 0;
+    #length = 1;
+    body = [{x:0, y:0}];
+    direction = 'r';
 
     grow() {
-        this.body.push({x: this.x , y: this.y})
-    }
-
-    currentPosition(xCoordinate, yCoordinate) {
-        this.x = xCoordinate;
-        this.y = yCoordinate;
+        this.body.push({x: this.#x , y: this.#y})
+        this.#length++;
+        console.log(this.#length);
     }
 
     changeDirection(directionSnakeIsFacing) {
@@ -31,41 +28,62 @@ class Snake {
     }
 
     move() {
+        switch (this.direction) {
+
+            case('d'):
+            (this.#y + this.snakeHeight >= canvasHeight)? this.#y = 0: this.#y += this.snakeHeight;
+            break;
+
+            case('u'):
+            (this.#y - this.snakeHeight < 0)? this.#y = canvasHeight - this.snakeHeight: this.#y -= this.snakeHeight;
+            break;
+
+            case('r'):
+            (this.#x + this.snakeWidth >= canvasWidth)? this.#x = 0: this.#x += this.snakeWidth;
+            break;
+
+            case('l'):
+            (this.#x - this.snakeWidth < 0)? this.#x = canvasWidth - this.snakeWidth: this.#x -= this.snakeWidth;
+            break;
+        }
+        
         this.body.pop();
-        this.body.unshift({x: this.x, y: this.y});
+        this.body.unshift({x: this.#x, y: this.#y});
     }
-
-
 }
 
-
 let snake = new Snake;
-snake.grow();
-snake.currentPosition(1,2);
-snake.grow();
-console.log(snake.body);
-
-let x = 0;
-let y = 0;
 
 const draw = setInterval(() => {
     ctx.clearRect(0,0, canvasWidth, canvasHeight);
-    ctx.fillRect(x,y, snake.snakeWidth, snake.snakeHeight);
-},0);
+    snake.move();
+    snake.body.forEach(joint => {
+    ctx.fillRect(joint.x ,joint.y , snake.snakeWidth, snake.snakeHeight);
+    })
+    ctx.fillRect(snake.x ,snake.y , snake.snakeWidth, snake.snakeHeight);    
+},100);
 
 window.addEventListener('keydown', (e) => {
     console.log(e.code);
     switch (e.code) {
         case('ArrowDown'):
-        (y + snake.snakeHeight >= canvasHeight)? y = 0: y += snake.snakeHeight;
+        case('KeyS'):
+        if (snake.direction != 'u') snake.changeDirection('d');
         break;
         case('ArrowUp'):
-        (y - snake.snakeHeight < 0)? y = canvasHeight - snake.snakeHeight: y -= snake.snakeHeight;
+        case('KeyW'):
+        if (snake.direction != 'd') snake.changeDirection('u');
         break;
         case('ArrowRight'):
-        (x + snake.snakeWidth >= canvasWidth)? x = 0: x += snake.snakeWidth; 
+        case('KeyD'):
+        if (snake.direction != 'l') snake.changeDirection('r');
         break;
         case('ArrowLeft'):
-        (x - snake.snakeWidth < 0)? x = canvasWidth - snake.snakeWidth: x -= snake.snakeWidth;
+        case('KeyA'):
+        if (snake.direction != 'r') snake.changeDirection('l');
+        break;
+        case('Space'):
+        snake.grow();
+        break;
     }
 })
