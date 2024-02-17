@@ -1,7 +1,7 @@
 :root {
-    /* --game-width: calc(100vw - (20 * 100vw / 100));
-    --game-height: calc(100vh - (20 * 100vh / 100)); */
+
 }
+
 
 * {
     box-sizing: border-box;
@@ -19,5 +19,4 @@
 
 #game {
     border: 1px solid black;
-
 }

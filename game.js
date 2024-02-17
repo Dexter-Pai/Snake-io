@@ -17,18 +17,53 @@ class Snake {
     body = [{x:0, y:0}];
     direction = 'r';
     currentlyMovingDir = 'r';
+    renderColor = 'black';
 
     grow() {
         this.body.push({x: this.#x , y: this.#y})
         this.#length++;
-        console.log(this.#length);
     }
 
     changeDirection(directionSnakeIsFacing) {
         this.direction = directionSnakeIsFacing;
     }
 
+    #getCollisionPoint() {
+        let collisionPoint = {};
+        switch (this.direction) {
+
+            case('d'):
+            collisionPoint = {x: this.#x , y: this.#y + this.snakeHeight};
+            break;
+
+            case('u'):
+            collisionPoint = {x: this.#x, y: this.#y - this.snakeHeight};
+            break;
+
+            case('r'):
+            collisionPoint = {x: this.#x + this.snakeWidth, y: this.#y};
+            break;
+
+            case('l'):
+            collisionPoint = {x: this.#x - this.snakeWidth, y: this.#y};
+            break;
+        }
+        return collisionPoint;
+    }
+
+    #checkCollision() {
+        const collisionPoint = this.#getCollisionPoint();
+        this.body.forEach(bodySegment => {
+            if (bodySegment.x === collisionPoint.x && bodySegment.y === collisionPoint.y) {
+                console.log('collided');
+                this.renderColor = 'red';
+            } else this.renderColor = 'black';
+        })
+
+    }
+
     move() {
+        this.#checkCollision();
         switch (this.direction) {
 
             case('d'):
@@ -56,17 +91,28 @@ class Snake {
 
 let snake = new Snake;
 
+const possibleGrids = (() => {
+    let grid = [];
+    for (let column = 0; column < canvasWidth; column * snake.snakeHeight) {
+        let tmp = [];
+        for (let row = 0; row < canvasHeight; row * snake.snakeWidth) {
+            tmp.push({x: row, y: column});
+        }
+        grid.push(tmp);
+    }
+    return grid;
+})();
+console.log(possibleGrids);
+
 const draw = setInterval(() => {
     ctx.clearRect(0,0, canvasWidth, canvasHeight);
     snake.move();
     snake.body.forEach(joint => {
     ctx.fillRect(joint.x ,joint.y , snake.snakeWidth, snake.snakeHeight);
-    })
-    ctx.fillRect(snake.x ,snake.y , snake.snakeWidth, snake.snakeHeight);    
+    })   
 },100);
 
 window.addEventListener('keydown', (e) => {
-    console.log(e.code);
     
     switch (e.code) {
         case('ArrowDown'):
@@ -87,6 +133,7 @@ window.addEventListener('keydown', (e) => {
         break;
         case('Space'):
         snake.grow();
+        console.table(snake.body);
         break;
     }
 })
