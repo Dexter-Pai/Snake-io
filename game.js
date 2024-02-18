@@ -8,6 +8,13 @@ ctx.canvas.height = 600;
 const canvasWidth = canvas.clientWidth;
 const canvasHeight = canvas.clientHeight;
 
+let keypressArray = [];
+const keyPairs = {
+    d : 'u',
+    u : 'd',
+    l : 'r',
+    r : 'l',
+}
 class Snake {
     snakeWidth = 25;
     snakeHeight = 25;
@@ -24,8 +31,14 @@ class Snake {
         this.#length++;
     }
 
-    changeDirection(directionSnakeIsFacing) {
-        this.direction = directionSnakeIsFacing;
+    #checkDirection() {
+        if (keypressArray == []) return;
+
+        for ( let i = keypressArray.length - 1; i >= 0; i--) {
+            if (keypressArray[i] != keyPairs[this.direction]) return keypressArray[i];
+        }
+
+        return this.direction;
     }
 
     #getCollisionPoint() {
@@ -63,6 +76,9 @@ class Snake {
     }
 
     move() {
+        this.direction = this.#checkDirection();
+        console.log(this.direction);
+        keypressArray = [];
         this.#checkCollision();
         switch (this.direction) {
 
@@ -82,28 +98,36 @@ class Snake {
             (this.#x - this.snakeWidth < 0)? this.#x = canvasWidth - this.snakeWidth: this.#x -= this.snakeWidth;
             break;
         }
+        // const beingPopped = this.body[this.body.length - 1];
+        // console.log(beingPopped);
         
+        // let indx = grid.findIndex(v => (v.x === beingPopped.x && v.y === beingPopped.y));
+        // if (indx != -1) grid.splice(indx, 1);
         this.body.pop();
         this.body.unshift({x: this.#x, y: this.#y});
+        // grid.push({x: this.#x, y: this.#y});
+        // console.log(grid);
         this.currentlyMovingDir = this.direction;
     }
 }
 
 let snake = new Snake;
 
-const possibleGrids = (() => {
+function possibleGrids() {
     let grid = [];
-    for (let column = 0; column < canvasWidth; column * snake.snakeHeight) {
+    for (let column = 0; column * snake.snakeHeight < canvasHeight; column++) {
         let tmp = [];
-        for (let row = 0; row < canvasHeight; row * snake.snakeWidth) {
-            tmp.push({x: row, y: column});
+        for (let row = 0; row * snake.snakeWidth < canvasWidth; row++) {
+            tmp.push({x: row * snake.snakeWidth, y: column * snake.snakeHeight});
         }
         grid.push(tmp);
     }
     return grid;
-})();
-console.log(possibleGrids);
+};
+const grid = possibleGrids().flat();
+console.log(grid);
 
+ctx.fillRect(0 ,0 , snake.snakeWidth, snake.snakeHeight);
 const draw = setInterval(() => {
     ctx.clearRect(0,0, canvasWidth, canvasHeight);
     snake.move();
@@ -115,27 +139,34 @@ const draw = setInterval(() => {
 window.addEventListener('keydown', (e) => {
     
     switch (e.code) {
+
         case('ArrowDown'):
         case('KeyS'):
-        if (snake.direction != 'u' && snake.currentlyMovingDir != 'u') snake.changeDirection('d');
+        keypressArray.push('d');
         break;
+
         case('ArrowUp'):
         case('KeyW'):
-        if (snake.direction != 'd' && snake.currentlyMovingDir != 'd') snake.changeDirection('u');
+        keypressArray.push('u');
         break;
+
         case('ArrowRight'):
         case('KeyD'):
-        if (snake.direction != 'l' && snake.currentlyMovingDir != 'l') snake.changeDirection('r');
+        keypressArray.push('r');
         break;
+
         case('ArrowLeft'):
         case('KeyA'):
-        if (snake.direction != 'r' && snake.currentlyMovingDir != 'r') snake.changeDirection('l');
+        keypressArray.push('l');
         break;
+
         case('Space'):
         snake.grow();
         console.table(snake.body);
         break;
     }
+
+    console.log(keypressArray);
 })
 
 // -----------------------------------
