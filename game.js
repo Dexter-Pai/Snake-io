@@ -3,8 +3,8 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
 
-ctx.canvas.width  = 200;
-ctx.canvas.height = 200;
+ctx.canvas.width  = 20 * 25;
+ctx.canvas.height = 20 * 25;
 const canvasWidth = canvas.clientWidth;
 const canvasHeight = canvas.clientHeight;
 
@@ -29,9 +29,12 @@ class Snake {
     ];
     direction = 'r';
     currentlyMovingDir = 'r';
+    countdown;
 
     grow() {
-        this.body.push({x: this.#x , y: this.#y});
+        this.countdown = 1;
+        this.body.push({x: this.body[this.body.length - 1].x , y: this.body[this.body.length - 1].y});
+        console.table(this.body);
         apple.grid.splice(apple.grid.findIndex(v => v == this.body[this.body.length -1]), 1);
         this.#length++;
     }
@@ -81,6 +84,9 @@ class Snake {
     }
 
     move() {
+        if (this.countdown == 1) this.countdown--;
+        if (this.countdown == 0) {console.table(this.body);this.countdown--};
+        // console.table(this.body);
         this.direction = this.#checkDirection();
         keypressArray = [];
         this.#checkCollision();
@@ -113,6 +119,8 @@ class Snake {
         this.body.pop();
         this.body.unshift({x: this.#x, y: this.#y});
         apple.grid.splice(apple.grid[apple.grid.findIndex(v => v == this.body[0])], 1);
+
+        // console.table(this.body);
         
         // grid.push({x: this.#x, y: this.#y});
         // console.log(apple.grid);
@@ -163,7 +171,6 @@ class Apple {
 }
 
 let apple = new Apple;
-console.log(apple.grid);
 const draw = setInterval(() => {
     ctx.clearRect(0,0, canvasWidth, canvasHeight);
     (!apple.applePresent) ? apple.makeNewApple() : apple.renderCurrentApple();
@@ -171,7 +178,7 @@ const draw = setInterval(() => {
     snake.body.forEach(joint => {
     ctx.fillRect(joint.x ,joint.y , snake.snakeWidth, snake.snakeHeight);
     })
-    snake.move();   
+    snake.move();
 },500);
 
 window.addEventListener('keydown', (e) => {
