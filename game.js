@@ -2,7 +2,7 @@ const main = document.getElementById('main');
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
-
+const latency = 100;
 ctx.canvas.width  = 20 * 25;
 ctx.canvas.height = 20 * 25;
 const canvasWidth = canvas.clientWidth;
@@ -179,7 +179,7 @@ const draw = setInterval(() => {
     ctx.fillRect(joint.x ,joint.y , snake.snakeWidth, snake.snakeHeight);
     })
     snake.move();
-},500);
+},latency);
 
 window.addEventListener('keydown', (e) => {
     
