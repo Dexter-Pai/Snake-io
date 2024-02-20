@@ -2,9 +2,9 @@ const main = document.getElementById('main');
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
-const latency = 100;
-ctx.canvas.width  = 20 * 25;
-ctx.canvas.height = 20 * 25;
+const latency = 400;
+ctx.canvas.width  = 6 * 25;
+ctx.canvas.height = 6 * 25;
 const canvasWidth = canvas.clientWidth;
 const canvasHeight = canvas.clientHeight;
 
@@ -108,23 +108,8 @@ class Snake {
             (this.#x - this.snakeWidth < 0)? this.#x = canvasWidth - this.snakeWidth: this.#x -= this.snakeWidth;
             break;
         }
-        // const beingPopped = this.body[this.body.length - 1];
-        // console.log(beingPopped);
-        
-        // let indx = grid.findIndex(v => (v.x === beingPopped.x && v.y === beingPopped.y));
-        // if (indx != -1) grid.splice(indx, 1);
-        // console.log(this.body[this.body.length-1]);
-        apple.grid.unshift(this.body[this.body.length-1]);
-        // apple.grid(apple.grid[apple.grid.findIndex(v => v == this.body[this.body.length-1])], 1)
         this.body.pop();
         this.body.unshift({x: this.#x, y: this.#y});
-        apple.grid.splice(apple.grid[apple.grid.findIndex(v => v == this.body[0])], 1);
-
-        // console.table(this.body);
-        
-        // grid.push({x: this.#x, y: this.#y});
-        // console.log(apple.grid);
-        this.currentlyMovingDir = this.direction;
     }
 }
 
@@ -134,8 +119,9 @@ class Apple {
 
     applePresent = false;
     currentSpawnPoint;
+    grid = this.possibleGrids();
 
-    grid = (function possibleGrids() {
+    possibleGrids() {
         let newGrid = [];
         for (let column = 0; column * snake.snakeHeight < canvasHeight; column++) {
             let tmp = [];
@@ -151,17 +137,20 @@ class Apple {
             if (index != -1) newGrid.splice(index, 1);
         }
         return newGrid;
-    })();
+    };
 
     getSpawnPoint() {
         return Math.floor(Math.random() * this.grid.length);
     }
 
     makeNewApple() {
-        this.currentSpawnPoint = this.getSpawnPoint();
-        ctx.fillRect(this.grid[this.currentSpawnPoint].x, this.grid[this.currentSpawnPoint].y, snake.snakeWidth, snake.snakeHeight);
-        this.applePresent = true;
-
+        this.grid = this.possibleGrids();
+        if (this.grid.length === 0) console.log('gameover');
+        else {
+            this.currentSpawnPoint = this.getSpawnPoint();
+            ctx.fillRect(this.grid[this.currentSpawnPoint].x, this.grid[this.currentSpawnPoint].y, snake.snakeWidth, snake.snakeHeight);
+            this.applePresent = true;
+        }
     }
 
     renderCurrentApple() {
