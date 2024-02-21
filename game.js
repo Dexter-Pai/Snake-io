@@ -1,41 +1,27 @@
-const main = document.getElementById('main');
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-
-const latency = 400;
-ctx.canvas.width  = 6 * 25;
-ctx.canvas.height = 6 * 25;
-const canvasWidth = canvas.clientWidth;
-const canvasHeight = canvas.clientHeight;
-
-let keypressArray = [];
-const keyPairs = {
-    d : 'u',
-    u : 'd',
-    l : 'r',
-    r : 'l',
-}
+// ----------------------------------------------------------
+// Snake Object
+// ----------------------------------------------------------
 
 class Snake {
+
     snakeWidth = 25;
     snakeHeight = 25;
+
     #x = 2* this.snakeWidth;
     #y = 0;
+
     #length = 1;
+    #direction = 'r';
+
     body = [
         {x: 2* this.snakeWidth, y: 0},
         {x: 1* this.snakeWidth, y: 0}, 
         {x:0, y:0},
     ];
-    direction = 'r';
-    currentlyMovingDir = 'r';
-    countdown;
 
-    grow() {
+    #grow() {
         this.countdown = 1;
         this.body.push({x: this.body[this.body.length - 1].x , y: this.body[this.body.length - 1].y});
-        console.table(this.body);
-        apple.grid.splice(apple.grid.findIndex(v => v == this.body[this.body.length -1]), 1);
         this.#length++;
     }
 
@@ -43,15 +29,15 @@ class Snake {
         if (keypressArray == []) return;
 
         for ( let i = keypressArray.length - 1; i >= 0; i--) {
-            if (keypressArray[i] != keyPairs[this.direction]) return keypressArray[i];
+            if (keypressArray[i] != keyPairs[this.#direction]) return keypressArray[i];
         }
 
-        return this.direction;
+        return this.#direction;
     }
 
     #getCollisionPoint() {
         let collisionPoint = {};
-        switch (this.direction) {
+        switch (this.#direction) {
 
             case('d'):
             collisionPoint = {x: this.#x , y: this.#y + this.snakeHeight};
@@ -74,38 +60,39 @@ class Snake {
 
     #checkCollision() {
         const collisionPoint = this.#getCollisionPoint();
+
+        // detecting collision with snake body
         this.body.forEach(bodySegment => {
-            if (bodySegment.x === collisionPoint.x && bodySegment.y === collisionPoint.y) console.log('collided');
+            if (bodySegment.x === collisionPoint.x && bodySegment.y === collisionPoint.y) gameOver();
         })
+
+        // detecting collision with apple
         if (collisionPoint.x == apple.grid[apple.currentSpawnPoint].x && collisionPoint.y == apple.grid[apple.currentSpawnPoint].y) {
             apple.applePresent = false;
-            this.grow();
+            this.#grow();
         }
     }
 
     move() {
-        if (this.countdown == 1) this.countdown--;
-        if (this.countdown == 0) {console.table(this.body);this.countdown--};
-        // console.table(this.body);
-        this.direction = this.#checkDirection();
+        this.#direction = this.#checkDirection();
         keypressArray = [];
         this.#checkCollision();
-        switch (this.direction) {
+        switch (this.#direction) {
 
             case('d'):
-            (this.#y + this.snakeHeight >= canvasHeight)? this.#y = 0: this.#y += this.snakeHeight;
+            (this.#y + this.snakeHeight >= canvasHeight)? gameOver(): this.#y += this.snakeHeight;
             break;
 
             case('u'):
-            (this.#y - this.snakeHeight < 0)? this.#y = canvasHeight - this.snakeHeight: this.#y -= this.snakeHeight;
+            (this.#y - this.snakeHeight < 0)? gameOver(): this.#y -= this.snakeHeight;
             break;
 
             case('r'):
-            (this.#x + this.snakeWidth >= canvasWidth)? this.#x = 0: this.#x += this.snakeWidth;
+            (this.#x + this.snakeWidth >= canvasWidth)? gameOver(): this.#x += this.snakeWidth;
             break;
 
             case('l'):
-            (this.#x - this.snakeWidth < 0)? this.#x = canvasWidth - this.snakeWidth: this.#x -= this.snakeWidth;
+            (this.#x - this.snakeWidth < 0)? gameOver(): this.#x -= this.snakeWidth;
             break;
         }
         this.body.pop();
@@ -113,15 +100,17 @@ class Snake {
     }
 }
 
-let snake = new Snake;
+// ----------------------------------------------------------
+// Apple Object
+// ----------------------------------------------------------
 
 class Apple {
 
     applePresent = false;
     currentSpawnPoint;
-    grid = this.possibleGrids();
+    grid;
 
-    possibleGrids() {
+    #possibleGrids() {
         let newGrid = [];
         for (let column = 0; column * snake.snakeHeight < canvasHeight; column++) {
             let tmp = [];
@@ -139,15 +128,17 @@ class Apple {
         return newGrid;
     };
 
-    getSpawnPoint() {
+    #getSpawnPoint() {
         return Math.floor(Math.random() * this.grid.length);
     }
 
     makeNewApple() {
-        this.grid = this.possibleGrids();
-        if (this.grid.length === 0) console.log('gameover');
-        else {
-            this.currentSpawnPoint = this.getSpawnPoint();
+        this.grid = this.#possibleGrids();
+        if (this.grid.length === 0) {
+            gameOver();
+            win = true;
+        } else {
+            this.currentSpawnPoint = this.#getSpawnPoint();
             ctx.fillRect(this.grid[this.currentSpawnPoint].x, this.grid[this.currentSpawnPoint].y, snake.snakeWidth, snake.snakeHeight);
             this.applePresent = true;
         }
@@ -159,16 +150,69 @@ class Apple {
 
 }
 
-let apple = new Apple;
-const draw = setInterval(() => {
+// ----------------------------------------------------------
+// Global Variables
+// ----------------------------------------------------------
+
+// Html elements
+const main = document.getElementById('main');
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+// Setting for how fast the game runs (in ms)
+// Smaller number for faster gameplay, larger means slower
+// 1000 means the snake will move every second
+const latency = 100;
+
+// Setting Canvas Width & Height
+ctx.canvas.width  = 20 * 25;
+ctx.canvas.height = 20 * 25;
+
+// Getting canvas values
+const canvasWidth = canvas.clientWidth;
+const canvasHeight = canvas.clientHeight;
+
+// Determine input (Don't tweak or game will break!)
+let keypressArray = [];
+const keyPairs = {
+    d : 'u',
+    u : 'd',
+    l : 'r',
+    r : 'l',
+}
+
+// Did the player win?
+let win = false;
+
+// placeholder for snake and apple objects
+let snake;
+let apple;
+// apple pixel art credit to https://www.deviantart.com/luna4s/art/Pixelart-Apple-706000118
+
+// ----------------------------------------------------------
+// Draw Function
+// ----------------------------------------------------------
+
+let startGame = setInterval(draw,latency);
+
+function draw() {
+    if (snake === undefined && apple === undefined) {
+        snake = new Snake;
+        apple = new Apple;
+    }
+
     ctx.clearRect(0,0, canvasWidth, canvasHeight);
     (!apple.applePresent) ? apple.makeNewApple() : apple.renderCurrentApple();
 
+    // render for each joints in the snake array
     snake.body.forEach(joint => {
     ctx.fillRect(joint.x ,joint.y , snake.snakeWidth, snake.snakeHeight);
     })
     snake.move();
-},latency);
+}
+// ----------------------------------------------------------
+// Input event handlers
+// ----------------------------------------------------------
 
 window.addEventListener('keydown', (e) => {
     
@@ -194,14 +238,36 @@ window.addEventListener('keydown', (e) => {
         keypressArray.push('l');
         break;
 
-        case('Space'):
-        snake.grow();
-        console.table(snake.body);
+        case('Escape'):
+        gameOver();
+        break;
+
+        case('Enter'):
+        startNewGame();
         break;
     }
 })
 
+// ----------------------------------------------------------
+// Game Functions
+// ----------------------------------------------------------
+
+function gameOver() {
+    if (win === true) console.log('You Win!');
+    delete snake;
+    delete apple;
+    clearInterval(startGame);
+}
+
+function startNewGame() {
+    win = false;
+    snake = new Snake;
+    apple = new Apple;
+    startGame = setInterval(draw,latency);
+}
+
+
 // -----------------------------------
 // Bug
 // -----------------------------------
-// direction change is faster than interval, snake can go backwards
+// Please Document known bugs and issues below;
