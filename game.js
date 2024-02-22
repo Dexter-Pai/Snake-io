@@ -218,7 +218,7 @@ function draw() {
     snake.body.forEach(joint => {
     ctx.fillRect(joint.x ,joint.y , snake.snakeWidth, snake.snakeHeight);
     })
-    
+
     snake.move();
 }
 // ----------------------------------------------------------
