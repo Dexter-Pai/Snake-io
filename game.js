@@ -109,6 +109,11 @@ class Apple {
     applePresent = false;
     currentSpawnPoint;
     grid;
+    #apple = new Image();
+    
+    setAppleSrc() {
+        this.#apple.src = 'static/apple.bmp';
+    }
 
     #possibleGrids() {
         let newGrid = [];
@@ -132,20 +137,25 @@ class Apple {
         return Math.floor(Math.random() * this.grid.length);
     }
 
+    #drawApple() {
+        ctx.drawImage(this.#apple, this.grid[this.currentSpawnPoint].x, this.grid[this.currentSpawnPoint].y, snake.snakeWidth, snake.snakeHeight);
+    }
+
     makeNewApple() {
+        this.setAppleSrc();
         this.grid = this.#possibleGrids();
         if (this.grid.length === 0) {
             gameOver();
             win = true;
         } else {
             this.currentSpawnPoint = this.#getSpawnPoint();
-            ctx.fillRect(this.grid[this.currentSpawnPoint].x, this.grid[this.currentSpawnPoint].y, snake.snakeWidth, snake.snakeHeight);
+            this.#drawApple();
             this.applePresent = true;
         }
     }
 
     renderCurrentApple() {
-        ctx.fillRect(this.grid[this.currentSpawnPoint].x, this.grid[this.currentSpawnPoint].y, snake.snakeWidth, snake.snakeHeight);
+        this.#drawApple();
     }
 
 }
@@ -208,6 +218,7 @@ function draw() {
     snake.body.forEach(joint => {
     ctx.fillRect(joint.x ,joint.y , snake.snakeWidth, snake.snakeHeight);
     })
+    
     snake.move();
 }
 // ----------------------------------------------------------
@@ -260,6 +271,7 @@ function gameOver() {
 }
 
 function startNewGame() {
+    gameOver();
     win = false;
     snake = new Snake;
     keypressArray = [];
