@@ -11,7 +11,7 @@ class Snake {
     #y = 0;
 
     #length = 1;
-    #direction = 'r';
+    direction = 'r';
 
     body = [
         {x: 2* this.snakeWidth, y: 0},
@@ -29,15 +29,15 @@ class Snake {
         if (keypressArray == []) return;
 
         for ( let i = keypressArray.length - 1; i >= 0; i--) {
-            if (keypressArray[i] != keyPairs[this.#direction]) return keypressArray[i];
+            if (keypressArray[i] != keyPairs[this.direction]) return keypressArray[i];
         }
 
-        return this.#direction;
+        return this.direction;
     }
 
     #getCollisionPoint() {
         let collisionPoint = {};
-        switch (this.#direction) {
+        switch (this.direction) {
 
             case('d'):
             collisionPoint = {x: this.#x , y: this.#y + this.snakeHeight};
@@ -74,10 +74,10 @@ class Snake {
     }
 
     move() {
-        this.#direction = this.#checkDirection();
+        this.direction = this.#checkDirection();
         keypressArray = [];
         this.#checkCollision();
-        switch (this.#direction) {
+        switch (this.direction) {
 
             case('d'):
             (this.#y + this.snakeHeight >= canvasHeight)? gameOver(): this.#y += this.snakeHeight;
@@ -262,6 +262,7 @@ function gameOver() {
 function startNewGame() {
     win = false;
     snake = new Snake;
+    keypressArray = [];
     apple = new Apple;
     startGame = setInterval(draw,latency);
 }
